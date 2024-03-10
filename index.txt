@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S3 Image Viewer</title>
+    <style>
+        /* Add your styles here */
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>S3 Image Viewer</h1>
+
+    <div id="imageContainer"></div>
+
+    <script>
+        // Replace 'your-bucket-name' with your actual S3 bucket name
+        const bucketName = 'your-bucket-name';
+        
+        // Function to fetch and display images from S3 bucket
+        async function fetchImages() {
+            const response = await fetch(`https://${bucketName}.s3.amazonaws.com/`);
+            const data = await response.text();
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(data, "text/xml");
+            const contents = xmlDoc.querySelectorAll('Contents');
+            
+            const imageContainer = document.getElementById('imageContainer');
+            
+            contents.forEach(content => {
+                const key = content.querySelector('Key').textContent;
+                const imageUrl = `https://${bucketName}.s3.amazonaws.com/${key}`;
+                
+                // Create an image element for each image in the S3 bucket
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.alt = key;
+                
+                // Append the image to the container
+                imageContainer.appendChild(img);
+            });
+        }
+
+        // Call the fetchImages function when the page loads
+        window.onload = fetchImages;
+    </script>
+</body>
+</html>
